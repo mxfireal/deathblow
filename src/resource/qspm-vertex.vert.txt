@@ -1,0 +1,15 @@
+#version 110 
+ 
+attribute vec4 Vert; 
+attribute vec2 TexCoords; 
+attribute vec2 LMCoords; 
+ 
+varying float FogFragCoord; 
+ 
+void main() 
+{ 
+	gl_TexCoord[0] = vec4(TexCoords, 0.0, 0.0); 
+	gl_TexCoord[1] = vec4(LMCoords, 0.0, 0.0); 
+	gl_Position = gl_ModelViewProjectionMatrix * Vert; 
+	FogFragCoord = gl_Position.w; 
+}

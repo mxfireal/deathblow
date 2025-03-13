@@ -1,0 +1,18 @@
+{
+    "files.associations": {
+        "default_cfg.h": "c",
+        "cerrno": "c",
+        "quakedef.h": "c",
+        "sdl_opengl.h": "c",
+        "console.h": "c",
+        "qs_contrl.h": "c",
+        "qs_io.h": "c",
+        "string.h": "c",
+        "functional": "c",
+        "gl.h": "c",
+        "sdl_opengl_glext.h": "c",
+        "qs_pvm.h": "c",
+        "anorms.h": "c",
+        "*.q1": "c"
+    }
+}

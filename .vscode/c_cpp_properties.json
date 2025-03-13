@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "defines": [
+                "USE_SDL2=1"
+            ],
+            "intelliSenseMode": "linux-gcc-x64",
+            "compilerPath": "/usr/bin/clang-14",
+            "cStandard": "c17",
+            "cppStandard": "c++14"
+        }
+    ],
+    "version": 4
+}
