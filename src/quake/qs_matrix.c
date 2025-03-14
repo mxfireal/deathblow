@@ -115,6 +115,6 @@ void MatrixSetFrustum(mat4 m, float fovX, float fovY)
 void MatrixSetFrustum_AspectFOV(mat4 m, float aspect,float fov)
 {
         float fovx = fov;
-        float fovy = fov * aspect;
+        float fovy = fov / aspect;
         MatrixSetFrustum(m,fovx,fovy);
 }

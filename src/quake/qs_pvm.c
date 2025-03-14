@@ -8,7 +8,12 @@ extern client_state_t cl;    // in cl_main.c, for getting viewangles
 extern refdef_t r_refdef;    // in gl_main.c, use instead of cl
 extern float r_fovx, r_fovy; // in gl_main.c
 
+//note: for a screen that is 4 / 3, the aspect ratio may not actually be 4 / 3,
+//the status bar or other whatever i dont know messes things up sorry
+
 typedef float *vec3_ptr; // confusing
+
+
 
 // name is a lie. only sets view matrix now
 void SetModelViewMatrix(mat4 out, int is_worldspawn)
@@ -25,16 +30,31 @@ void SetModelViewMatrix(mat4 out, int is_worldspawn)
         */
         int fn = is_worldspawn ? 90 : 0;
 
-        // MatrixRotate(m, -90, 1, 0, 0); //Not needed anymore
-        // MatrixRotate(m, 90, 0, 0, 1); //Not sure what this does lol
+#if 0
+        MatrixRotate(m, -90, 1, 0, 0); 
+        MatrixRotate(m, 90, 0, 0, 1);
+#endif
 
         MatrixTranslate(m, -r_refdef.vieworg[0], -r_refdef.vieworg[1], -r_refdef.vieworg[2]); // gl has -z as forward
-        MatrixTranslate(m, 0,cl.viewheight,0);
+        MatrixTranslate(m, 0, cl.viewheight, 0);
+
+        float pitchrot = r_refdef.viewangles[PITCH];
+        float yawrot = -(r_refdef.viewangles[YAW] - fn);
+        float rollrot = r_refdef.viewangles[ROLL];
+
+#if 0
         MatrixRotate_OnePass(
             m,
             -r_refdef.viewangles[PITCH] + 90,
             r_refdef.viewangles[YAW]  - fn,
             -r_refdef.viewangles[ROLL]);
+#else
+        MatrixRotate(m, -90, 1, 0, 0); 
+        MatrixTranslate(m, 0, 0, 25); //manual touchup
+        MatrixRotate(m,yawrot, 0, 1, 0);
+        MatrixRotate(m,pitchrot,1,0,0);
+        MatrixRotate(m,rollrot,0,0,1);
+#endif
 
         memcpy(out, m, sizeof(float) * 16);
 }
@@ -48,23 +68,25 @@ void qspvm_apply(vec3_ptr model, vec3_ptr angles, int is_worldspawn)
 
         vec3_ptr view_angles = r_refdef.viewangles;
         vec3_ptr view_origin = r_refdef.vieworg;
-
+        MatrixIdentity(perspective_mat4);
+#if 0
         // placeholder
         float fov = 90.0f;
         float aspect = 4.0 / 3.0;
-
-        MatrixIdentity(perspective_mat4);
         MatrixSetFrustum_AspectFOV(perspective_mat4, aspect, fov);
-
+        #else
+        MatrixSetFrustum(perspective_mat4,r_fovx,r_fovy);
+        #endif
+        
         MatrixIdentity(view_mat4);
         SetModelViewMatrix(view_mat4, is_worldspawn);
 
         MatrixIdentity(model_mat4);
         MatrixRotate_OnePass(
-                model_mat4,
-                angles[PITCH],
-                -angles[YAW],
-                angles[ROLL]);
+            model_mat4,
+            angles[PITCH],
+            -angles[YAW],
+            angles[ROLL]);
         MatrixTranslate(model_mat4, model[0], model[2], -model[1]);
 
         GLint prog = 0;
