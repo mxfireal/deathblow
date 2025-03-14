@@ -150,8 +150,8 @@ static cvar_t	vid_desktopfullscreen = {"vid_desktopfullscreen", "0", CVAR_ARCHIV
 static cvar_t	vid_borderless = {"vid_borderless", "0", CVAR_ARCHIVE}; // QuakeSpasm
 //johnfitz
 
-cvar_t		vid_gamma = {"gamma", "0.835", CVAR_ARCHIVE}; //johnfitz -- moved here from view.c
-cvar_t		vid_contrast = {"contrast", "1.1", CVAR_ARCHIVE}; //QuakeSpasm, MarkV
+cvar_t		vid_gamma = {"gamma", "0.2", CVAR_ARCHIVE}; //johnfitz -- moved here from view.c
+cvar_t		vid_contrast = {"contrast", "1", CVAR_ARCHIVE}; //QuakeSpasm, MarkV
 
 //==========================================================================
 //
