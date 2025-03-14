@@ -28,13 +28,13 @@ void SetModelViewMatrix(mat4 out, int is_worldspawn)
         // MatrixRotate(m, -90, 1, 0, 0); //Not needed anymore
         // MatrixRotate(m, 90, 0, 0, 1); //Not sure what this does lol
 
+        MatrixTranslate(m, -r_refdef.vieworg[0], -r_refdef.vieworg[1], -r_refdef.vieworg[2]); // gl has -z as forward
+        MatrixTranslate(m, 0,cl.viewheight,0);
         MatrixRotate_OnePass(
             m,
-            r_refdef.viewangles[PITCH] + 90,
+            -r_refdef.viewangles[PITCH] + 90,
             r_refdef.viewangles[YAW]  - fn,
             -r_refdef.viewangles[ROLL]);
-        MatrixTranslate(m, -r_refdef.vieworg[0], -r_refdef.vieworg[2], r_refdef.vieworg[1]); // gl has -z as forward
-        // MatrixTranslate(m, 0,-cl.viewheight,0);
 
         memcpy(out, m, sizeof(float) * 16);
 }
