@@ -2,6 +2,8 @@
 #define GL_GLEXT_PROTOTYPES
 #include <SDL2/SDL_opengl.h>
 #include <SDL2/SDL_opengl_glext.h>
+#include <GL/gl.h>
+
 #include <math.h>
 #include "qs_matrix.h"
 extern client_state_t cl;    // in cl_main.c, for getting viewangles
@@ -15,17 +17,17 @@ typedef float *vec3_ptr;
 
 int cv_setuped=0;
 cvar_t cv_modelscale = {"sau_modelscale","1",0};
-cvar_t cv_modelrot_x = {"sau_modelrot_x","0",0};
-cvar_t cv_modelrot_y = {"sau_modelrot_y","0",0};
-cvar_t cv_modelrot_z = {"sau_modelrot_z","0",0};
+cvar_t cv_modeloffset_x = {"sau_modeloffset_x","1",0};
+cvar_t cv_modeloffset_y = {"sau_modeloffset_y","1",0};
+cvar_t cv_modeloffset_z = {"sau_modeloffset_z","1",0};
 void checkcvars()
 {
         if (cv_setuped) return;
         cv_setuped=1;
         Cvar_RegisterVariable(&cv_modelscale);
-        Cvar_RegisterVariable(&cv_modelrot_x);
-        Cvar_RegisterVariable(&cv_modelrot_y);
-        Cvar_RegisterVariable(&cv_modelrot_z);
+        Cvar_RegisterVariable(&cv_modeloffset_x);
+        Cvar_RegisterVariable(&cv_modeloffset_y);
+        Cvar_RegisterVariable(&cv_modeloffset_z);
 }
 
 // name is a lie. only sets view matrix now
@@ -80,7 +82,7 @@ void SetModelViewMatrix(mat4 out, int is_worldspawn)
 #define gl_passm4(vMAT4, vLOC) glUniformMatrix4fv(vLOC, 1, 0, vMAT4);
 
 // todo: dont calculate stuff we dont need. check if the uniform exists b4 doing any math
-void qspvm_apply(vec3_ptr model, vec3_ptr angles, int is_worldspawn,vec3_ptr model_scale)
+void qspvm_apply(vec3_ptr model, vec3_ptr angles, int is_worldspawn,aliashdr_t *paliashdr)
 {
         mat4_t(model_mat4);
         mat4_t(view_mat4);
@@ -114,28 +116,36 @@ void qspvm_apply(vec3_ptr model, vec3_ptr angles, int is_worldspawn,vec3_ptr mod
 
         if (do_model != -1)
         { 
+                vec3_ptr alias_scale = paliashdr ? paliashdr->scale : 0;
                 // model matrix (if applicable)
                 MatrixIdentity(model_mat4);
 
-                if (model_scale && cv_modelscale.value)
+
+
+                float rpitch = -angles[PITCH];
+                float ryaw = angles[YAW];
+                float rroll = -angles[ROLL];
+                if (alias_scale)
                 {
-                        MatrixScale(model_mat4,model_scale[0],model_scale[1],model_scale[2]);
+                        MatrixScale(model_mat4,alias_scale[0],alias_scale[1],alias_scale[2]);
                 }
 
+                if (alias_scale)
+                {
+                        MatrixTranslate(model_mat4, paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
+                }
 
-                MatrixRotate(model_mat4, cv_modelrot_x.value, 1, 0, 0);
-                MatrixRotate(model_mat4, cv_modelrot_y.value, 0, 1, 0);
-                MatrixRotate(model_mat4, cv_modelrot_z.value, 0, 0, 1);
-
-                float ryaw = -angles[YAW];
-                float rpitch = angles[PITCH];
-                float rroll = angles[ROLL];
-
-                MatrixRotate(model_mat4, ryaw, 0, 1, 0);
-                MatrixRotate(model_mat4, rpitch, 0, 0, 1);
                 MatrixRotate(model_mat4, rroll, 1, 0, 0);
-
+                MatrixRotate(model_mat4, rpitch, 0, 1, 0);
+                MatrixRotate(model_mat4, ryaw, 0, 0, 1);
                 MatrixTranslate(model_mat4, model[0], model[1], model[2]);
+
+
+
+
+
+
+                
 
                 gl_passm4(model_mat4, do_model);
         }
@@ -176,7 +186,7 @@ void QSPVM_Apply_FromDrawAliasFrameGLSL(aliashdr_t *paliashdr, lerpdata_t lerpda
                 v_model = lerpdata.origin;
         }
                 #endif
-        v_model = lerpdata.origin; //paliashdr->scale_origin;
+        v_model = lerpdata.origin; 
         v_angles = lerpdata.angles;
-        qspvm_apply(v_model, v_angles, 0,paliashdr->scale);
+        qspvm_apply(v_model, v_angles, 0,paliashdr);
 }

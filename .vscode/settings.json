@@ -13,6 +13,7 @@
         "sdl_opengl_glext.h": "c",
         "qs_pvm.h": "c",
         "anorms.h": "c",
-        "*.q1": "c"
+        "*.q1": "c",
+        "qs_matrix.h": "c"
     }
 }

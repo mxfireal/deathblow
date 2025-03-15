@@ -113,6 +113,10 @@ static void *GLARB_GetNormalOffset (aliashdr_t *hdr, int pose)
 	return (void *)(currententity->model->vboxyzofs + (hdr->numverts_vbo * pose * sizeof (meshxyz_t)) + normaloffs);
 }
 #include "prongresource.h"
+
+cvar_t cv_drawglsl = {"sau_useglsl","1",0};
+bool crl=0;
+
 /*
 =============
 GLAlias_CreateShaders
@@ -120,6 +124,10 @@ GLAlias_CreateShaders
 */
 void GLAlias_CreateShaders (void)
 {
+        if (!crl)
+        {
+                Cvar_RegisterVariable(&cv_drawglsl);
+        }
 	const glsl_attrib_binding_t bindings[] = {
 		{ "TexCoords", texCoordsAttrIndex },
 		{ "Pose1Vert", pose1VertexAttrIndex },
@@ -769,7 +777,7 @@ void R_DrawAliasModel (entity_t *e)
 	}
 // call fast path if possible. if the shader compliation failed for some reason,
 // r_alias_program will be 0.
-	else if (r_alias_program != 0)
+	else if (r_alias_program != 0 && cv_drawglsl.value)
 	{
 		GL_DrawAliasFrame_GLSL (paliashdr, lerpdata, tx, fb);
 	}

@@ -1129,6 +1129,9 @@ void R_DrawLightmapChains_GLSL(qmodel_t *model, entity_t *ent, texchain_t chain)
         GL_SelectTexture(GL_TEXTURE0);
 }
 
+
+extern cvar_t cv_drawglsl;
+
 /*
 =============
 R_DrawWorld -- johnfitz -- rewritten
@@ -1163,7 +1166,7 @@ void R_DrawTextureChains(qmodel_t *model, entity_t *ent, texchain_t chain)
 
         if (r_lightmap_cheatsafe)
         {
-                if (r_world_program != 0)
+                if (r_world_program != 0 && cv_drawglsl.value)
                 {
                         R_DrawLightmapChains_GLSL(model, ent, chain);
                         return;
@@ -1189,7 +1192,7 @@ void R_DrawTextureChains(qmodel_t *model, entity_t *ent, texchain_t chain)
         R_DrawTextureChains_NoTexture(model, chain);
 
         // OpenGL 2 fast path
-        if (r_world_program != 0)
+        if (r_world_program != 0 && cv_drawglsl.value)
         {
                 R_EndTransparentDrawing(entalpha);
 
