@@ -13,3 +13,5 @@ void MatrixRotate(mat4 m, float angle, float x, float y, float z);
 void MatrixRotate_OnePass(mat4 m, float x, float y, float z);
 void MatrixSetFrustum(mat4 m, float fovX, float fovY);
 void MatrixSetFrustum_AspectFOV(mat4 m, float aspect,float fov);
+
+void MatrixScale(mat4 m,float sx,float sy,float sz);

@@ -590,7 +590,7 @@ void R_DrawTextureChains_Water(qmodel_t *model, entity_t *ent, texchain_t chain)
         has_lit_water = false;
         has_unlit_water = false;
 
-        if (r_oldwater.value)
+        if (r_oldwater.value && 0)
         {
                 for (i = 0; i < model->numtextures; i++)
                 {
@@ -714,7 +714,7 @@ void R_DrawTextureChains_Water(qmodel_t *model, entity_t *ent, texchain_t chain)
         else
                 has_unlit_water = true;
 
-        if (has_unlit_water)
+        if (has_unlit_water && 0)
         {
                 // Unlit water
                 for (i = 0; i < model->numtextures; i++)

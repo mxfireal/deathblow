@@ -118,3 +118,12 @@ void MatrixSetFrustum_AspectFOV(mat4 m, float aspect,float fov)
         float fovy = fov / aspect;
         MatrixSetFrustum(m,fovx,fovy);
 }
+
+void MatrixScale(mat4 m, float sx, float sy, float sz) {
+        float s[16];
+        MatrixIdentity(s);
+        s[0] = sx;
+        s[5] = sy;
+        s[10] = sz;
+        MatrixMultiply(m, m, s);
+    }

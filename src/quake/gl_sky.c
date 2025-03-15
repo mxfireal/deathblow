@@ -1103,6 +1103,7 @@ void Sky_DrawSky (void)
 		skymaxs[0][i] = skymaxs[1][i] = -FLT_MAX;
 	}
 
+        return; //no
 	//
 	// process world and bmodels: draw flat-shaded sky surfs, and update skybounds
 	//
