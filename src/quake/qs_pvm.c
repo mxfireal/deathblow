@@ -36,15 +36,6 @@ void SetModelViewMatrix(mat4 out, int is_worldspawn)
         checkcvars();
         mat4_t(m);
         MatrixIdentity(m);
-        /*
-
-                X, Y, Z
-                X -> Yaw
-                Y -> Pitch
-                Z -> Roll
-
-        */
-        int fn = is_worldspawn ? 90 : 90;
 
 #if 0
         MatrixRotate(m, -90, 1, 0, 0); 
@@ -55,7 +46,7 @@ void SetModelViewMatrix(mat4 out, int is_worldspawn)
         MatrixTranslate(m, 0, cl.viewheight, 0);
 
         float pitchrot = r_refdef.viewangles[PITCH];
-        float yawrot = -(r_refdef.viewangles[YAW] - fn);
+        float yawrot = -(r_refdef.viewangles[YAW] - 90);
         float rollrot = r_refdef.viewangles[ROLL];
 
 #if 0
@@ -151,16 +142,30 @@ void qspvm_apply(vec3_ptr model, vec3_ptr angles, int is_worldspawn,aliashdr_t *
         }
 }
 
-// this gets passed from WORLDSPAWN
+// this gets passed from WORLDSPAWN / Brush based models (ex: quake itemboxes, and whatnot)
 
 void QSPVM_Apply_FromTextureChainsGLSL(qmodel_t *model, entity_t *ent, texchain_t chain)
 {
         vec3_t empty_origin = {0, 0, 0};
 
-        vec3_ptr v_model = empty_origin;
-        vec3_ptr v_angles = empty_origin;
+        vec3_ptr v_model;
+        vec3_ptr v_angles;
+        int is_worldspawn;
+        
+        if (ent)
+        {
+                v_model = ent->origin;
+                v_angles = ent->angles;
+                is_worldspawn = 0;
+        }
+        else
+        {
+                v_model = empty_origin;
+                v_angles = empty_origin;
+                is_worldspawn = 1;
+        }
 
-        qspvm_apply(v_model, v_angles, 1,0);
+        qspvm_apply(v_model, v_angles, is_worldspawn,0);
 }
 
 // this gets passed from entities
