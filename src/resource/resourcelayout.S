@@ -37,6 +37,33 @@ saf:
     .incbin "qspm-alias.frag.txt"
     .byte 0
 
+spsmfrag_w:
+    .asciz "-a -F"
+    .asciz "qspFS_w" 
+    .asciz "shaders/qspm-fragment-warp.frag.txt"
+    .incbin "qspm-fragment-warp.frag.txt"
+    .byte 0
+
+spsmvert_w:
+    .asciz "-a -F"
+    .asciz "qspVS_w"
+    .asciz "shaders/qspm-vertex-warp.vert.txt"
+    .incbin "qspm-vertex-warp.vert.txt"
+    .byte 0
+
+spsmfrag_s:
+    .asciz "-a -F"
+    .asciz "qspFS_s" 
+    .asciz "shaders/qspm-fragment-sky.frag.txt"
+    .incbin "qspm-fragment-warp.frag.txt"
+    .byte 0
+
+spsmvert_s:
+    .asciz "-a -F"
+    .asciz "qspVS_s"
+    .asciz "shaders/qspm-vertex-sky.vert.txt"
+    .incbin "qspm-vertex-warp.vert.txt"
+    .byte 0
 
 resource_end:
     .asciz "-b"
@@ -49,8 +76,12 @@ resource_end:
 resource_table:
     .quad spsmfrag
     .quad spsmvert
-    .quad sav
-    .quad saf
+    .quad sav # alias vertex shader
+    .quad saf # alias fragment shader
+    .quad spsmfrag_w
+    .quad spsmvert_w
+    .quad spsmfrag_s
+    .quad spsmvert_s
 
 
     .quad resource_end # end

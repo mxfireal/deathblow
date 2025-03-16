@@ -112,6 +112,8 @@ qboolean r_drawflat_cheatsafe, r_fullbright_cheatsafe, r_lightmap_cheatsafe, r_d
 
 cvar_t	r_scale = {"r_scale", "2", CVAR_ARCHIVE};
 
+cvar_t cv_useqsrs = {"sau_useqsrs","1",0};
+
 //==============================================================================
 //
 // GLSL GAMMA CORRECTION
@@ -892,7 +894,7 @@ void R_DrawShadows (void)
 		glDisable(GL_STENCIL_TEST);
 	}
 }
-
+extern cvar_t cv_drawglsl;
 /*
 ================
 R_RenderScene
@@ -900,6 +902,12 @@ R_RenderScene
 */
 void R_RenderScene (void)
 {
+
+        if (cv_useqsrs.value ){//&& cv_drawglsl.value) {
+                QSRSC_RenderScene();
+                return;
+        }
+
 	R_SetupScene (); //johnfitz -- this does everything that should be done once per call to RenderScene
 
 	Fog_EnableGFog (); //johnfitz

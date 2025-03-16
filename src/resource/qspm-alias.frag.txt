@@ -1,4 +1,4 @@
-#version 110    
+#version 330 
 
 uniform sampler2D Tex;
 uniform sampler2D FullbrightTex;
@@ -6,21 +6,15 @@ uniform bool UseFullbrightTex;
 uniform bool UseOverbright;
 uniform bool UseAlphaTest;
 
-varying float FogFragCoord;
+in vec2 o_uv;
+in vec4 o_color;
+
+out vec4 color;
 
 void main() {
-    vec4 result = texture2D(Tex, gl_TexCoord[0].xy);
-    if(UseAlphaTest&&(result.a<0.666))
-        discard;
-    result *= gl_Color;
-    if(UseOverbright)
-        result.rgb *= 2.0;
-    if(UseFullbrightTex)
-        result += texture2D(FullbrightTex, gl_TexCoord[0].xy);
+    vec4 result = texture(Tex, o_uv);
+    result = result * o_color;
     result = clamp(result, 0.0, 1.0);
-    float fog = exp(-gl_Fog.density*gl_Fog.density*FogFragCoord*FogFragCoord);
-    fog = clamp(fog, 0.0, 1.0);
-    result = mix(gl_Fog.color, result, fog);
-    result.a = gl_Color.a;     // FIXME: This will make almost transparent things cut holes though heavy fog
-    gl_FragColor = result;
-};
+
+    color = result;
+}

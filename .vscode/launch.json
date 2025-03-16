@@ -11,7 +11,7 @@
         "program": "${workspaceFolder}/build/quakesauce-d",
         
         "args": [],
-        "stopAtEntry": false,
+        "stopAtEntry": true,
         "cwd": "${workspaceFolder}/working/",
         "environment": [],
         "externalConsole": false,

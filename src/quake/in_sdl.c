@@ -849,7 +849,7 @@ static inline int IN_SDL_KeysymToQuakeKey(SDLKey sym)
 	case SDLK_BREAK: return K_PAUSE;
 	case SDLK_PAUSE: return K_PAUSE;
 
-	case SDLK_WORLD_18: return '~'; // the '²' key
+	case SDLK_WORLD_18: return '~'; // the 'ï¿½' key
 
 	default: return 0;
 	}
@@ -1026,6 +1026,14 @@ void IN_SendKeyEvents (void)
 				windowhasfocus = false;
 				S_BlockSound();
 			}
+                        else if (event.window.event == SDL_WINDOWEVENT_RESIZED || event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+                        {
+                                int sizex = event.window.data1;
+                                int sizey = event.window.data2;
+                                vid.width = sizex;
+                                vid.height = sizey;
+                                VID_Restart();
+                        }
 			break;
 #else
 		case SDL_ACTIVEEVENT:

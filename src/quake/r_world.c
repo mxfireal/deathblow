@@ -353,7 +353,7 @@ static unsigned int num_vbo_indices;
 R_ClearBatch
 ================
 */
-static void R_ClearBatch(void)
+void R_ClearBatch(void)
 {
         num_vbo_indices = 0;
 }
@@ -365,7 +365,7 @@ R_FlushBatch
 Draw the current batch if non-empty and clears it, ready for more R_BatchSurface calls.
 ================
 */
-static void R_FlushBatch(void)
+void R_FlushBatch(void)
 {
         if (num_vbo_indices > 0)
         {
@@ -382,7 +382,7 @@ Add the surface to the current batch, or just draw it immediately if we're not
 using VBOs.
 ================
 */
-static void R_BatchSurface(msurface_t *s)
+void R_BatchSurface(msurface_t *s)
 {
         int num_surf_indices = R_NumTriangleIndicesForSurf(s);
 
@@ -547,21 +547,22 @@ float GL_WaterAlphaForEntitySurface(entity_t *ent, msurface_t *s)
         return entalpha;
 }
 
-static GLuint r_world_program;
-extern GLuint gl_bmodel_vbo;
+GLuint r_world_program;
+GLuint r_water_program;
+GLuint gl_bmodel_vbo;
 
 // uniforms used in vert shader
 
 // uniforms used in frag shader
-static GLint texLoc;
-static GLint LMTexLoc;
-static GLint fullbrightTexLoc;
-static GLint useFullbrightTexLoc;
-static GLint useOverbrightLoc;
-static GLint useAlphaTestLoc;
-static GLint useLightmapWideLoc;
-static GLint useLightmapOnlyLoc;
-static GLint alphaLoc;
+GLint texLoc;
+GLint LMTexLoc;
+GLint fullbrightTexLoc;
+ GLint useFullbrightTexLoc;
+ GLint useOverbrightLoc;
+ GLint useAlphaTestLoc;
+ GLint useLightmapWideLoc;
+ GLint useLightmapOnlyLoc;
+ GLint alphaLoc;
 
 #define vertAttrIndex 0
 #define texCoordsAttrIndex 1
@@ -617,14 +618,14 @@ void R_DrawTextureChains_Water(qmodel_t *model, entity_t *ent, texchain_t chain)
                         R_EndTransparentDrawing(entalpha);
                 }
         }
-        else if (cl.worldmodel->haslitwater && r_litwater.value && r_world_program != 0)
+        else if (1 || cl.worldmodel->haslitwater && r_litwater.value && r_water_program != 0)
         {
                 const int overbright = !!gl_overbright.value;
                 const int wide10bits = !!r_lightmapwide.value;
 
                 has_lit_water = true;
 
-                GL_UseProgramFunc(r_world_program);
+                GL_UseProgramFunc(r_water_program);
 
                 // Bind the buffers
                 GL_BindBuffer(GL_ARRAY_BUFFER, gl_bmodel_vbo);
@@ -648,16 +649,20 @@ void R_DrawTextureChains_Water(qmodel_t *model, entity_t *ent, texchain_t chain)
                 GL_Uniform1iFunc(useLightmapWideLoc, wide10bits);
                 GL_Uniform1iFunc(useLightmapOnlyLoc, 0);
 
+                QSPVM_Apply_FromTextureChainsGLSL(model,ent,chain);
+
                 for (i = 0; i < model->numtextures; i++)
                 {
                         t = model->textures[i];
 
-                        if (!t || !t->texturechains[chain] || !(t->texturechains[chain]->flags & SURF_DRAWTURB))
+                        // mxfireal - changed to always allow water even if its unlit. change this if you dont want that
+
+                        if (!t || !t->texturechains[chain])
                                 continue;
 
-                        if (t->texturechains[chain]->texinfo->flags & TEX_SPECIAL)
+                        if (!(t->texturechains[chain]->flags & SURF_DRAWTURB))
                         {
-                                has_unlit_water = true;
+                                // not a warp surface
                                 continue;
                         }
 
@@ -676,7 +681,7 @@ void R_DrawTextureChains_Water(qmodel_t *model, entity_t *ent, texchain_t chain)
                                         }
 
                                         GL_SelectTexture(GL_TEXTURE0);
-                                        GL_Bind(t->warpimage);
+                                        GL_Bind(t->gltexture);
 
                                         if (model != cl.worldmodel)
                                         {
@@ -813,6 +818,8 @@ void R_DrawLightmapChains(void)
 }
 
 #include "prongresource.h"
+#include "qs_pvm.h"
+#include "qs-scene.h"
 
 /*
 =============
@@ -919,9 +926,20 @@ void GLWorld_CreateShaders(void)
                 Sys_Printf("## warning: failed to generate GLSL shaders for world. falling back to legacy gl behaviour. this is usually caused by shaders failing to compile. Fix your shaders!!\n");
                 Sys_Sleep(200); // sorry
         }
+        fragSource = PrRs_Lookup("qspFS_w");
+        vertSource = PrRs_Lookup("qspVS_w");
+        r_water_program = GL_CreateProgram(vertSource,fragSource,0,0);
+
+        qsrc_programs[kQSRSCProgramWorld] = r_world_program;
+        qsrc_programs[kQSRSCProgramWarp] = r_water_program;
+        int skyprog;
+        fragSource = PrRs_Lookup("qspFS_s");
+        vertSource = PrRs_Lookup("qspVS_s");
+        skyprog = GL_CreateProgram(vertSource,fragSource,0,0);
+        qsrc_programs[kQSRSCProgramSky] = skyprog;
+;
 }
 
-#include "qs_pvm.h"
 
 /*
 ================

@@ -166,6 +166,15 @@ void QSPVM_Apply_FromTextureChainsGLSL(qmodel_t *model, entity_t *ent, texchain_
         }
 
         qspvm_apply(v_model, v_angles, is_worldspawn,0);
+
+        //while we're here.. (needs to be STRIPPED)
+        GLint prog;
+        glGetIntegerv(GL_CURRENT_PROGRAM, &prog);
+        int time_uniform = GL_GetUniformLocationFunc(prog,"m_uTime");
+        if (time_uniform != -1)
+        {
+                GL_Uniform1fFunc(time_uniform,cl.time);
+        }
 }
 
 // this gets passed from entities

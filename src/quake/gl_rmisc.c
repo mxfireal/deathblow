@@ -233,6 +233,8 @@ void R_Init (void)
 
         extern cvar_t r_scale_uncapped;
         Cvar_RegisterVariable (&r_scale_uncapped);
+        extern cvar_t cv_useqsrs;
+        Cvar_RegisterVariable (&cv_useqsrs);
 
 	R_InitParticles ();
 	R_SetClearColor_f (&r_clearcolor); //johnfitz
