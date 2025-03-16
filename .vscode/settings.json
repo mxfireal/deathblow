@@ -14,6 +14,11 @@
         "qs_pvm.h": "c",
         "anorms.h": "c",
         "*.q1": "c",
-        "qs_matrix.h": "c"
+        "qs_matrix.h": "c",
+        "nuklear_sdl_gl3.h": "c",
+        "glew.h": "c",
+        "qs_nuklear.h": "c",
+        "glquake.h": "c",
+        "nuklear.h": "c"
     }
 }

@@ -58,7 +58,7 @@ static void Sys_InitSDL (void)
 
 #define DEFAULT_MEMORY (256 * 1024 * 1024) // ericw -- was 72MB (64-bit) / 64MB (32-bit)
 
-static quakeparms_t	parms;
+quakeparms_t	parms;
 
 // On OS X we call SDL_main from the launcher, but SDL2 doesn't redefine main
 // as SDL_main on OS X anymore, so we do it ourselves.
@@ -66,7 +66,7 @@ static quakeparms_t	parms;
 #define main SDL_main
 #endif
 
-int main(int argc, char *argv[])
+int spasm_sdl_main(int argc, char *argv[])
 {
 	int		t;
 	double		time, oldtime, newtime;
@@ -145,6 +145,7 @@ int main(int argc, char *argv[])
 		newtime = Sys_DoubleTime ();
 		time = newtime - oldtime;
 
+                
 		Host_Frame (time);
 
 		if (time < sys_throttle.value && !cls.timedemo)

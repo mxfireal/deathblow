@@ -556,10 +556,14 @@ void Sys_Sleep (unsigned long msecs)
 /*	usleep (msecs * 1000);*/
 	SDL_Delay (msecs);
 }
-
+int sdl_msgloop();
 void Sys_SendKeyEvents (void)
 {
+        #if 0
 	IN_Commands();		//ericw -- allow joysticks to add keys so they can be used to confirm SCR_ModalMessage
 	IN_SendKeyEvents();
+        #else
+        sdl_msgloop();
+        #endif
 }
 

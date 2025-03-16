@@ -63,6 +63,8 @@ cvar_t	joy_exponent_move = { "joy_exponent_move", "2", CVAR_ARCHIVE };
 cvar_t	joy_swapmovelook = { "joy_swapmovelook", "0", CVAR_ARCHIVE };
 cvar_t	joy_enable = { "joy_enable", "1", CVAR_ARCHIVE };
 
+#include "qs_nuklear.h"
+
 #if defined(USE_SDL2)
 static SDL_JoystickID joy_active_instaceid = -1;
 static SDL_GameController *joy_active_controller = NULL;
@@ -391,7 +393,7 @@ void IN_Init (void)
 	Cvar_RegisterVariable(&joy_swapmovelook);
 	Cvar_RegisterVariable(&joy_enable);
 
-	IN_Activate();
+	//IN_Activate();
 	IN_StartupJoystick();
 }
 
@@ -1004,13 +1006,39 @@ static void IN_DebugKeyEvent(SDL_Event *event)
 #endif
 }
 
+
+SDL_Event* sauce_event;
+
+
+int sauceorevent(SDL_Event* event)
+{
+        if (sauce_event > 1)
+        {
+                //ok
+                memcpy(event,sauce_event,sizeof(SDL_Event));
+                sauce_event=1;
+                return 1;
+        }
+        else
+        {
+                if (sauce_event == 1)
+                {
+                        sauce_event = 0;
+                        return 0;
+                }
+                return SDL_PollEvent(&event);
+        }
+        return 0;
+}
+
 void IN_SendKeyEvents (void)
 {
 	SDL_Event event;
 	int key;
 	qboolean down;
 
-	while (SDL_PollEvent(&event))
+        
+	while (sauceorevent(&event))
 	{
 		switch (event.type)
 		{
@@ -1163,6 +1191,8 @@ void IN_SendKeyEvents (void)
 		default:
 			break;
 		}
+
 	}
+        
 }
 

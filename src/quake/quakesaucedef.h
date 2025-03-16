@@ -1,0 +1,8 @@
+#ifndef QS_STRINGIFY
+#define	QS_STRINGIFY_(x)	#x
+#define	QS_STRINGIFY(x)	QS_STRINGIFY_(x)
+#endif
+
+#define QUAKESAUCE_VERSION      2.7     //mxfireal
+
+#define QUAKESAUCE_VER_STRING QS_STRINGIFY(QUAKESAUCE_VERSION)

@@ -50,9 +50,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // combined version string like "0.92.1-beta1"
 #define	QUAKESPASM_VER_STRING	QS_STRINGIFY(QUAKESPASM_VERSION) "." QS_STRINGIFY(QUAKESPASM_VER_PATCH) QUAKESPASM_VER_SUFFIX
 
-#define QUAKESAUCE_VERSION      2.7     //mxfireal
-
-#define QUAKESAUCE_VER_STRING QS_STRINGIFY(QUAKESAUCE_VERSION)
+#include "quakesaucedef.h"
 
 //define	PARANOID			// speed sapping error checking
 

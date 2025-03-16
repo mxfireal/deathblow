@@ -65,10 +65,17 @@ void QSRSC_RenderScene()
 {
         rcv();
         float scale = getscale();
-        glViewport(glx + r_refdef.vrect.x,
-                   gly + glheight - r_refdef.vrect.y - r_refdef.vrect.height,
-                   r_refdef.vrect.width / scale,
-                   r_refdef.vrect.height / scale);
+        if (scale != 1)
+        {
+                glViewport(glx + r_refdef.vrect.x,
+                        gly + glheight - r_refdef.vrect.y - r_refdef.vrect.height,
+                        r_refdef.vrect.width / scale,
+                        r_refdef.vrect.height / scale);
+        }
+        else
+        {
+                glViewport(0,0,vid.width,vid.height);
+        }
 
 #if 0
 	glCullFace(GL_FRONT);
@@ -80,6 +87,8 @@ void QSRSC_RenderScene()
         glDisable(GL_BLEND);
         glDisable(GL_ALPHA_TEST);
         glEnable(GL_DEPTH_TEST);
+
+        
         //(draw world)
         qsrc_DrawTextureChains(cl.worldmodel, NULL, chain_world);
 

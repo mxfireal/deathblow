@@ -685,6 +685,7 @@ void GL_SetCanvas (canvastype newcanvas)
 
 	if (newcanvas == currentcanvas)
 		return;
+        //return;
 
 	currentcanvas = newcanvas;
 

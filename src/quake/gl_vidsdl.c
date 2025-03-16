@@ -32,6 +32,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <OpenGL/OpenGL.h>
 #endif
 
+#include "qs_nuklear.h"
+
 #define MAX_MODE_LIST 600 // johnfitz -- was 30
 #define MAX_BPPS_LIST 5
 #define MAX_RATES_LIST 20
@@ -64,8 +66,8 @@ static int nummodes;
 static qboolean vid_initialized = false;
 
 #if defined(USE_SDL2)
-static SDL_Window *draw_context;
-static SDL_GLContext gl_context;
+extern SDL_Window *draw_context;
+extern SDL_GLContext gl_context;
 #else
 static SDL_Surface *draw_context;
 #endif
@@ -80,7 +82,7 @@ static void VID_MenuKey(int key);
 
 static void ClearAllStates(void);
 static void GL_Init(void);
-static void GL_SetupState(void); // johnfitz
+void GL_SetupState(void); // johnfitz
 
 viddef_t vid; // global video state
 modestate_t modestate = MS_UNINIT;
@@ -150,8 +152,8 @@ static cvar_t vid_desktopfullscreen = {"vid_desktopfullscreen", "0", CVAR_ARCHIV
 static cvar_t vid_borderless = {"vid_borderless", "0", CVAR_ARCHIVE};               // QuakeSpasm
 // johnfitz
 
-cvar_t vid_gamma = {"gamma", "0.2", CVAR_ARCHIVE};     // johnfitz -- moved here from view.c
-cvar_t vid_contrast = {"contrast", "1", CVAR_ARCHIVE}; // QuakeSpasm, MarkV
+cvar_t vid_gamma = {"oldhidden_!gamma", "1", CVAR_ARCHIVE};     // johnfitz -- moved here from view.c
+cvar_t vid_contrast = {"oldhidden_!contrast", "1", CVAR_ARCHIVE}; // QuakeSpasm, MarkV
 
 //==========================================================================
 //
@@ -286,11 +288,12 @@ VID_Gamma_Init -- call on init
 */
 static void VID_Gamma_Init(void)
 {
+        #if 0
         Cvar_RegisterVariable(&vid_gamma);
         Cvar_RegisterVariable(&vid_contrast);
         Cvar_SetCallback(&vid_gamma, VID_Gamma_f);
         Cvar_SetCallback(&vid_contrast, VID_Gamma_f);
-
+#endif
         if (gl_glsl_gamma_able)
                 return;
 
@@ -595,7 +598,7 @@ static qboolean VID_SetMode(int width, int height, int refreshrate, int bpp, qbo
 #if 0
 	q_snprintf(caption, sizeof(caption), "QuakeSpasm " QUAKESPASM_VER_STRING);
 #else
-        q_snprintf(caption, sizeof(caption), "quakesauce " QUAKESAUCE_VER_STRING);
+        
 #endif
 
 #if 0
@@ -732,30 +735,7 @@ static qboolean VID_SetMode(int width, int height, int refreshrate, int bpp, qbo
 
 	modestate = VID_GetFullscreen() ? MS_FULLSCREEN : MS_WINDOWED;
 #else
-        flags |= SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL;
-
-        if (!draw_context)
-        {
-                SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, depthbits);
-                SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, stencilbits);
-
-                /* fsaa */
-                SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, fsaa > 0 ? 1 : 0);
-                SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, fsaa);
-
-#if 0
-SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_PROFILE_CORE);
-#endif
-                draw_context = SDL_CreateWindow(caption, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, flags);
-                SDL_ShowWindow(draw_context);
-                SDL_RaiseWindow(draw_context);
-        }
-
-        if (!gl_context)
-                gl_context = SDL_GL_CreateContext(draw_context);
-
+        
         vid.width = VID_GetCurrentWidth();
         vid.height = VID_GetCurrentHeight();
         vid.conwidth = vid.width & 0xFFFFFFF8;
@@ -763,6 +743,7 @@ SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_PROFILE_CORE);
         vid.numpages = 2;
 
         modestate = MS_WINDOWED;
+        glClearColor(1,0,1,1);
 
 #endif
         CDAudio_Resume();
@@ -1059,10 +1040,17 @@ static void GL_CheckExtensions(void)
         //
         if (COM_CheckParm("-nomtex"))
                 Con_Warning("Mutitexture disabled at command line\n");
-        else if (GL_ParseExtensionList(gl_extensions, "GL_ARB_multitexture"))
+        else if (GL_ParseExtensionList(gl_extensions, "GL_ARB_multitexture") || 1) //forced 1 since gl_extensions fails to be set sometimes
         {
                 GL_MTexCoord2fFunc = (PFNGLMULTITEXCOORD2FARBPROC)SDL_GL_GetProcAddress("glMultiTexCoord2fARB");
                 GL_SelectTextureFunc = (PFNGLACTIVETEXTUREARBPROC)SDL_GL_GetProcAddress("glActiveTextureARB");
+
+                if (!GL_SelectTextureFunc)
+                {
+                        //try this
+                        GL_SelectTextureFunc = (PFNGLACTIVETEXTUREARBPROC)SDL_GL_GetProcAddress("glActiveTexture");
+                }
+
                 GL_ClientActiveTextureFunc = (PFNGLCLIENTACTIVETEXTUREARBPROC)SDL_GL_GetProcAddress("glClientActiveTextureARB");
                 if (GL_MTexCoord2fFunc && GL_SelectTextureFunc && GL_ClientActiveTextureFunc)
                 {
@@ -1363,9 +1351,9 @@ GL_SetupState -- johnfitz
 does all the stuff from GL_Init that needs to be done every time a new GL render context is created
 ===============
 */
-static void GL_SetupState(void)
+void GL_SetupState(void)
 {
-        glClearColor(0.15, 0.15, 0.15, 0); // johnfitz -- originally 1,0,0,0
+        //glClearColor(0.15, 0.15, 0.15, 0); // johnfitz -- originally 1,0,0,0
         glCullFace(GL_BACK);               // johnfitz -- glquake used CCW with backwards culling -- let's do it right
         glFrontFace(GL_CW);                // johnfitz -- glquake used CCW with backwards culling -- let's do it right
         glEnable(GL_TEXTURE_2D);
@@ -1454,14 +1442,7 @@ GL_EndRendering
 */
 void GL_EndRendering(void)
 {
-        if (!scr_skipupdate)
-        {
-#if defined(USE_SDL2)
-                SDL_GL_SwapWindow(draw_context);
-#else
-                SDL_GL_SwapBuffers();
-#endif
-        }
+        exit(1);
 }
 
 void VID_Shutdown(void)
@@ -1787,7 +1768,7 @@ void VID_Init(void)
         if (p && p < com_argc - 1)
                 fsaa = atoi(com_argv[p + 1]);
 
-                #if 0
+#if 0
         if (!VID_ValidMode(width, height, refreshrate, bpp, fullscreen))
         {
                 width = (int)vid_width.value;
@@ -1805,9 +1786,9 @@ void VID_Init(void)
                 bpp = display_bpp;
                 fullscreen = false;
         }
-                #else
+#else
 
-                #endif
+#endif
 
         vid_initialized = true;
 

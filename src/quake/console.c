@@ -112,6 +112,7 @@ void Con_ToggleConsole_f (void)
 		con_backscroll = 0; //johnfitz -- toggleconsole should return you to the bottom of the scrollback
 		history_line = edit_line; //johnfitz -- it should also return you to the bottom of the command history
 
+                QSau_ShowConsole(0);
 		if (cls.state == ca_connected)
 		{
 			IN_Activate();
@@ -126,6 +127,7 @@ void Con_ToggleConsole_f (void)
 	{
 		IN_Deactivate(modestate == MS_WINDOWED);
 		key_dest = key_console;
+                QSau_ShowConsole(1);
 	}
 
 	SCR_EndLoadingPlaque ();
@@ -522,7 +524,7 @@ void Con_Printf (const char *fmt, ...)
 		if (!inupdate)
 		{
 			inupdate = true;
-			SCR_UpdateScreen ();
+			//SCR_UpdateScreen ();
 			inupdate = false;
 		}
 	}

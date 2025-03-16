@@ -237,7 +237,7 @@ void R_Init (void)
         Cvar_RegisterVariable (&cv_useqsrs);
 
 	R_InitParticles ();
-	R_SetClearColor_f (&r_clearcolor); //johnfitz
+	//R_SetClearColor_f (&r_clearcolor); //johnfitz
 
 	Sky_Init (); //johnfitz
 	Fog_Init (); //johnfitz

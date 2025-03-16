@@ -1032,23 +1032,24 @@ needs almost the entire 256k of stack space!
 */
 void SCR_UpdateScreen (void)
 {
-	vid.numpages = (gl_triplebuffer.value) ? 3 : 2;
-
+        vid.numpages = (gl_triplebuffer.value) ? 3 : 2;
+        
 	if (scr_disabled_for_loading)
 	{
-		if (realtime - scr_disabled_time > 60)
+                if (realtime - scr_disabled_time > 60)
 		{
-			scr_disabled_for_loading = false;
+                        scr_disabled_for_loading = false;
 			Con_Printf ("load failed.\n");
 		}
 		else
-			return;
+                return;
 	}
-
+        
 	if (!scr_initialized || !con_initialized)
-		return;				// not initialized yet
-
-
+        return;				// not initialized yet
+        
+;
+                
 	GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
 
 	//
@@ -1068,6 +1069,7 @@ void SCR_UpdateScreen (void)
 
 	//FIXME: only call this when needed
 	SCR_TileClear ();
+
 
 	if (scr_drawdialog) //new game confirm
 	{
@@ -1094,6 +1096,7 @@ void SCR_UpdateScreen (void)
 	}
 	else
 	{
+                #if 1
 		SCR_DrawCrosshair (); //johnfitz
 		SCR_DrawNet ();
 		SCR_DrawTurtle ();
@@ -1105,12 +1108,17 @@ void SCR_UpdateScreen (void)
 		SCR_DrawClock (); //johnfitz
 		SCR_DrawConsole ();
 		M_Draw ();
+                #else
+                
+                #endif
 	}
 
 	V_UpdateBlend (); //johnfitz -- V_UpdatePalette cleaned up and renamed
 
-	GLSLGamma_GammaCorrect ();
+        //GL_SetCanvas(CANVAS_DEFAULT); //for later
 
-	GL_EndRendering ();
+        //GLSLGamma_GammaCorrect ();
+
+        
 }
 

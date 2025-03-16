@@ -1,5 +1,5 @@
 # prong build script (JAN 17 2025)
-# VERSION 2.7 (MAR 10 2025)
+# VERSION 2.9 (MAR 16 2025)
 
 # Compiler and linker
 CC = gcc
@@ -20,7 +20,7 @@ IGNOREWARNINGS = -Wpointer-to-int-cast -Wno-implicit -Wimplicit-function-declara
 CFLAGS = $(IGNOREWARNINGS) -fcommon $(EXTRADEFS) -Dstricmp=strcasecmp -mno-tls-direct-seg-refs -DGLQUAKE
 
 
-LDFLAGS = -lSDL2 -lGL -fcommon -mno-tls-direct-seg-refs -lm
+LDFLAGS = -lSDL2 -lGL -fcommon -mno-tls-direct-seg-refs -lm -lGLU -lGLEW
 
 CFLAGS += -DUSE_SDL2
 # CFLAGS += -DDO_USERDIRS=1
@@ -73,12 +73,9 @@ DEBUG_SUFFIX = -d
 EDIT_SUFFIX = -t
 RELEASES_SUFFIX = -rs
 
-DEBUG_OUTNAME = $(DEBUG_DIR)/$(PRONG_APPNAME)$(DEBUG_SUFFIX)$(OUTEXTENSION)
-RELEASE_OUTNAME = $(RELEASE_DIR)/$(PRONG_APPNAME)$(RELEASE_SUFFIX)$(OUTEXTENSION)
-EDIT_OUTNAME = $(EDIT_DIR)/$(PRONG_APPNAME)$(EDIT_SUFFIX)$(OUTEXTENSION)
-
-
-
+DEBUG_OUTNAME = $(BUILD_DIR)/$(PRONG_APPNAME)$(DEBUG_SUFFIX)$(OUTEXTENSION)
+RELEASE_OUTNAME = $(BUILD_DIR)/$(PRONG_APPNAME)$(RELEASE_SUFFIX)$(OUTEXTENSION)
+EDIT_OUTNAME = $(BUILD_DIR)/$(PRONG_APPNAME)$(EDIT_SUFFIX)$(OUTEXTENSION)
 
 ifeq ($(BUILD),DEBUG)
 # debug cflags
@@ -100,38 +97,39 @@ CUR_OUTNAME = $(EDIT_OUTNAME)
 
 endif
 
-OBJECTS = $(wildcard $(CUR_BUILD_DIR)/*.o)
-DEPS = $(wildcard $(CUR_BUILD_DIR)/*.d)
+# Ensure the build directory exists
+$(CUR_BUILD_DIR):
+	mkdir -p $(CUR_BUILD_DIR)
 
-OBJECTS_HONEST = $(notdir $(SRC:.c=.o))
-DEPS_HONEST = $(notdir $(SRC:.c=.d))
-# Include dependencies
--include $(wildcard $(CUR_BUILD_DIR)/*.d)
--include $(wildcard $(BUILD_DIR)/*.d)
+# Corrected object and dependency file paths
+OBJECTS = $(patsubst $(SRC_FOLDER)/%.c, $(CUR_BUILD_DIR)/%.o, $(SRC))
+DEPS = $(OBJECTS:.o=.d)
 
+# Include dependencies properly
+-include $(DEPS)
 
+RESOURCE_OBJECTS = $(CUR_BUILD_DIR)/prongresource.o $(CUR_BUILD_DIR)/resourcelayout.o 
 
 # Build rules
-$(CUR_OUTNAME): src/resource/prongresource.o src/resource/resourcelayout.o $(addprefix $(SRC_FOLDER)/,$(OBJECTS_HONEST))
-	$(CC) $(CFLAGS) $(CUR_BUILD_DIR)/*.o $(BUILD_DIR)/*.o -o $(BUILD_DIR)/$(notdir $@) $(LDFLAGS)
-	
-	
-%.o: %.c
-	@echo "\e[1m ** Compiling $@ from $< \e[0m"
-	mkdir -p $(CUR_BUILD_DIR)
-	$(CC) $(CFLAGS) $(LDFLAGS) -c $< -o $(CUR_BUILD_DIR)/$(notdir $@)
+$(CUR_OUTNAME): $(RESOURCE_OBJECTS) $(OBJECTS)
+	$(CC) $(CFLAGS) $(OBJECTS) $(RESOURCE_OBJECTS) -o $(CUR_OUTNAME) $(LDFLAGS)
 
-%.o: %.S
+$(CUR_BUILD_DIR)/%.o: $(SRC_FOLDER)/%.c | $(CUR_BUILD_DIR)
 	@echo "\e[1m ** Compiling $@ from $< \e[0m"
-	$(CC) $(CFLAGS) -c $< -o $(BUILD_DIR)/$(notdir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
 
+$(CUR_BUILD_DIR)/%.o: src/resource/%.S | $(CUR_BUILD_DIR)
+	@echo "\e[1m ** Assembling $@ from $< \e[0m"
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(CUR_BUILD_DIR)/%.o: src/resource/%.c | $(CUR_BUILD_DIR)
+	@echo "\e[1m ** Compiling $@ from $< \e[0m"
+	$(CC) $(CFLAGS) -c $< -o $@
 
 all: $(CUR_OUTNAME)
 
 # Clean rule
 clean:
-	rm -f $(OBJS) $(DEPS) $(CUR_OUTNAME)
-
-
+	rm -f $(OBJECTS) $(DEPS) $(CUR_OUTNAME)
 
 .PHONY: all release edit debug asm clean_release clean_edit clean_debug clean_asm clean everything build_resource clean_resource symbols build_releasewsymbols allsymbols

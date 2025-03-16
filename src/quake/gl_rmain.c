@@ -69,7 +69,7 @@ cvar_t	r_dynamic = {"r_dynamic","1",CVAR_ARCHIVE};
 cvar_t	r_novis = {"r_novis","0",CVAR_ARCHIVE};
 
 cvar_t	gl_finish = {"gl_finish","0",CVAR_NONE};
-cvar_t	gl_clear = {"gl_clear","1",CVAR_NONE};
+cvar_t	gl_clear = {"gl_clear","0",CVAR_NONE};
 cvar_t	gl_cull = {"gl_cull","0",CVAR_NONE}; //needs to be 1 - mxf
 cvar_t	gl_smoothmodels = {"gl_smoothmodels","1",CVAR_NONE};
 cvar_t	gl_affinemodels = {"gl_affinemodels","0",CVAR_NONE};
@@ -81,7 +81,7 @@ cvar_t	gl_nocolors = {"gl_nocolors","0",CVAR_NONE};
 //johnfitz -- new cvars
 cvar_t	r_stereo = {"r_stereo","0",CVAR_NONE};
 cvar_t	r_stereodepth = {"r_stereodepth","128",CVAR_NONE};
-cvar_t	r_clearcolor = {"r_clearcolor","2",CVAR_ARCHIVE};
+cvar_t	r_clearcolor = {"r_clearcolor","0",0};
 cvar_t	r_drawflat = {"r_drawflat","0",CVAR_NONE};
 cvar_t	r_flatlightstyles = {"r_flatlightstyles", "0", CVAR_NONE};
 cvar_t	gl_fullbrights = {"gl_fullbrights", "1", CVAR_ARCHIVE};
@@ -110,7 +110,7 @@ float	map_wateralpha, map_lavaalpha, map_telealpha, map_slimealpha;
 
 qboolean r_drawflat_cheatsafe, r_fullbright_cheatsafe, r_lightmap_cheatsafe, r_drawworld_cheatsafe; //johnfitz
 
-cvar_t	r_scale = {"r_scale", "2", CVAR_ARCHIVE};
+cvar_t	r_scale = {"r_scale", "1", CVAR_ARCHIVE};
 
 cvar_t cv_useqsrs = {"sau_useqsrs","1",0};
 
