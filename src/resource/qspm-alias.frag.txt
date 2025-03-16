@@ -8,13 +8,24 @@ uniform bool UseAlphaTest;
 
 in vec2 o_uv;
 in vec4 o_color;
+in vec3 o_normal;
 
 out vec4 color;
 
 void main() {
     vec4 result = texture(Tex, o_uv);
     result = result * o_color;
-    result = clamp(result, 0.0, 1.0);
+    //result = clamp(result, 0.0, 1.0);
 
+    if (UseOverbright)
+    {
+        //not sure what this is for
+        result *= 2.0;
+    }
+    //Must be last
+    if (UseFullbrightTex)
+    {
+        result += texture(FullbrightTex,o_uv);
+    } 
     color = result;
 }

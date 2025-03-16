@@ -279,6 +279,8 @@ void GL_DrawAliasFrame_GLSL (aliashdr_t *paliashdr, lerpdata_t lerpdata, gltextu
 
         QSPVM_Apply_FromDrawAliasFrameGLSL(paliashdr,lerpdata,tx,fb);
 
+        QSRSC_FromRenderAlias();
+
 // set textures
 	GL_SelectTexture (GL_TEXTURE0);
 	GL_Bind (tx);

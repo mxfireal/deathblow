@@ -18,8 +18,13 @@ extern GLint useLightmapWideLoc;
 extern GLint useLightmapOnlyLoc;
 extern GLint alphaLoc;
 
-cvar_t cv_warpstyle = {"sau_warpstyle","1",0};
-cvar_t cv_warpstyle_liquid = {"sau_warpstyle_liquid","-1",0};
+//use quake's effects for teleporters by default, and the new fx for liquids
+cvar_t cv_warpstyle = {"sau_warpstyle","0",0};
+cvar_t cv_warpstyle_liquid = {"sau_warpstyle_liquid","1",0};
+cvar_t cv_alias_dotstyle = {"sau_dotstyle","0",0};
+cvar_t cv_alias_lightingstyle = {"sau_lightstyle","0",0};
+cvar_t cv_alias_lightingscale = {"sau_lightscale","1.0",0};
+cvar_t cv_alias_specularthreshold = {"sau_specularthreshold","-1",0};
 
 void rcv()
 {
@@ -27,6 +32,10 @@ void rcv()
         if (sdv) return;
         Cvar_RegisterVariable(&cv_warpstyle);
         Cvar_RegisterVariable(&cv_warpstyle_liquid);
+        Cvar_RegisterVariable(&cv_alias_dotstyle);
+        Cvar_RegisterVariable(&cv_alias_lightingstyle);
+        Cvar_RegisterVariable(&cv_alias_lightingscale);
+        Cvar_RegisterVariable(&cv_alias_specularthreshold);
         sdv=1;
 }
 
@@ -235,4 +244,16 @@ void qsrc_DrawTextureChains(qmodel_t *model, entity_t *ent, texchain_t chain)
                 glDepthMask(GL_TRUE);
                 glDisable(GL_BLEND);
         }
+}
+
+void QSRSC_FromRenderAlias()
+{
+        rcv();
+        GLint program;
+        glGetIntegerv(GL_CURRENT_PROGRAM, &program);
+
+        GL_Uniform1iFunc(get_uniform(program, "u_mDotStyle"), cv_alias_dotstyle.value);
+        GL_Uniform1iFunc(get_uniform(program, "u_mLightingStyle"), cv_alias_lightingstyle.value);
+        GL_Uniform1fFunc(get_uniform(program, "u_mLightingScale"), cv_alias_lightingscale.value);
+        GL_Uniform1fFunc(get_uniform(program, "u_mSpecularThres"), cv_alias_specularthreshold.value);
 }

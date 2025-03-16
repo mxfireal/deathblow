@@ -22,13 +22,26 @@
  {  
     vec2 nuuv = o_uv;
     color = vec4(0.71, 0.16, 0.46, 1.0);
-
- 	vec4 result = texture(Tex, nuuv) * 4.0;  
+    vec4 result = color;
+ 	result = texture(Tex, nuuv) * 4.0;  
  	if (UseLightmapOnly)  
  		result = vec4(0.5, 0.5, 0.5, 1.0);  
  	if (UseAlphaTest && (result.a < 0.666))  
  		return; //?? i guess 
- 	result *= texture(LMTex, o_uv_lm);  
+
+    vec4 lighting = texture(LMTex, o_uv_lm);
+ 	result *= lighting;  
+    
+    if (UseOverbright)
+    {
+        result *= 2.0;
+    }
+
+    //must be last
+    if (UseFullbrightTex)
+    {
+        result += texture(FullbrightTex,o_uv);
+    }
 
  	result.a = Alpha;  
  	

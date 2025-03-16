@@ -11,24 +11,138 @@
  uniform bool UseOverbright;  
  uniform bool UseAlphaTest;  
  uniform bool UseLightmapWide;  
- uniform bool UseLightmapOnly;  
+ uniform bool UseLightmapOnly; 
  uniform float Alpha;  
+ uniform int m_uWarpStyle; 
    
+uniform float m_uTime;
+
  varying float FogFragCoord;  
 
  out vec4 color;
-   
+
+vec4 qsample(vec2 uv)
+{
+    vec4 c = texture(Tex,uv);
+    if (UseFullbrightTex)
+    c += texture(FullbrightTex,uv);
+    return c;
+}
+
+
+//in quakespasm, this is a texture change.. i assume thats how glquake does it too..
+//so to simulate a 128x128 texture we round the uv to the nearest 128x128 pixel
+//note: for texture filtering this needs to be disabled somehow
+vec2 vec2_truncate(vec2 vec2input,float amount)
+{
+    vec2input *= amount;
+    vec2input.x = round(vec2input.x);
+    vec2input.y = round(vec2input.y);
+    vec2input /= amount;
+    return vec2input;
+}
+
+
  void main()  
  {  
-    vec2 nuuv = o_uv;
     color = vec4(0.71, 0.16, 0.46, 1.0);
+    //return; 
+    /*
+    
+        style 0 = quake imitation
+        style 1 = quakesauce style
+        style 2 = old (worse) quake imitation
+        style 3-6 = giygas/postal-like effect (for portals)
+    */
+    int style = m_uWarpStyle;
+    vec2 nuuv = o_uv;
+    nuuv *= 2.0;
+    if (style >= 100) style -= 100;
+    else {
+        nuuv = vec2_truncate(nuuv,128);
+    }
 
- 	vec4 result = texture(Tex, nuuv) * 4.0;  
+    vec2 neweruv = nuuv;
+    vec4 result = vec4(0,0,0,0);
+    float result_scale = 1.0;
+
+    float natural_time = m_uTime * 0.3;
+if (style == 0)
+{
+    float qktime = m_uTime * 2.3;
+    float sinsize = 3.14159;
+    neweruv.x += cos((nuuv.y * sinsize) + qktime) * 0.0366;
+    neweruv.y += sin((nuuv.x * sinsize) + qktime) * 0.0366;
+}
+else if (style == 1)
+{
+    vec2 samplepos = neweruv * (2);
+    samplepos += natural_time;
+    samplepos.x = sin(samplepos.x);
+    samplepos.y = sin(samplepos.y);
+    vec4 sample = qsample(samplepos);
+    float fx = sqrt(sample.x * sample.y * sample.z);
+    fx += sqrt(abs(o_uv.x * o_uv.y) + 1);
+    fx += natural_time;
+    neweruv.x += sin(fx) * 0.2;
+    neweruv.y += cos(fx) * 0.2;
+}
+else if (style == 2)
+{
+    neweruv.x += sin((nuuv.y * 6.28) + m_uTime) * 0.1;
+    neweruv.y += sin((nuuv.x * 6.28) + m_uTime) * 0.1;
+}
+else if (style >= 3 && style <= 6)
+{
+    float fx = m_uTime * 2.9;
+    float st = sin((m_uTime * 0.25) + (nuuv.y * 2.4)) * 1.25;
+    float sc = clamp(st,0,1);
+    vec2 offy = vec2(sin(fx),cos(fx)) * (sc * 0.1);
+    
+    offy.x += sin(m_uTime + (nuuv.y * 8)) * clamp(-st,0,1) * 0.15;
+
+    result_scale = 1.0;
+    vec4 iresult_1 = qsample(nuuv - offy) * result_scale;
+    vec4 iresult_2 = qsample(nuuv + offy) * result_scale;
+if (style == 3)
+{
+    result = (iresult_1 + iresult_2) / 2.0;
+}
+else if (style == 4)
+{
+        result.r = iresult_1.r;
+        result.g = sqrt(iresult_1.g * iresult_2.g);
+        result.b = iresult_2.b;
+}
+else if (style == 5|| style == 6)
+{
+   
+        float lp_root = ((nuuv.y * 2) + m_uTime);
+        float lp_r = (sin(lp_root));
+        float lp_g = (sin(lp_root-1.5));
+        float lp_b = (sin(lp_root-2.3561925));
+        if (style == 5)
+        {
+            lp_r = clamp(lp_r,0,1); lp_g = clamp(lp_g,0,1); lp_b = clamp(lp_b,0,1);
+        }
+        result.r = mix(iresult_1.r,iresult_2.r,lp_r);
+        result.g = mix(iresult_1.g,iresult_2.g,lp_g);
+        result.b = mix(iresult_1.b,iresult_2.b,lp_b);
+}
+
+    result_scale = 0;
+}
+
+
+    
+
+ 	result += qsample(neweruv) * result_scale;  
  	if (UseLightmapOnly)  
  		result = vec4(0.5, 0.5, 0.5, 1.0);  
- 	if (UseAlphaTest && (result.a < 0.666))  
- 		return; //?? i guess 
- 	result *= texture(LMTex, o_uv_lm);  
+ 	//if (UseAlphaTest && (result.a < 0.666))  
+ 	//	return; //?? i guess 
+ 	//result *= texture(LMTex, o_uv_lm);  
+
 
  	result.a = Alpha;  
  	

@@ -1,0 +1,33 @@
+ #version 330  
+
+in vec2 o_uv;
+in vec3 o_origin;
+in vec3 o_Rorigin;
+
+in mat4 o_view;
+in mat4 o_projection;
+
+in vec4 gl_FragCoord;
+
+uniform sampler2D Tex;
+uniform sampler2D LMTex;
+uniform sampler2D FullbrightTex;
+
+uniform float m_uTime;
+
+out vec4 color;
+
+vec2 vec2_truncate(vec2 vec2input, float amount) {
+    vec2input *= amount;
+    vec2input.x = round(vec2input.x);
+    vec2input.y = round(vec2input.y);
+    vec2input /= amount;
+    return vec2input;
+}
+
+//temporary, im not sure how to do this
+void main() {
+
+    color = vec4(0.0, 0.0, 0.0, 1.0);
+
+}

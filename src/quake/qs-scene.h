@@ -12,3 +12,4 @@ enum
 extern int qsrc_programs[];
 
 void QSRSC_RenderScene();
+void QSRSC_FromRenderAlias();

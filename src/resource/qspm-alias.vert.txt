@@ -19,6 +19,7 @@ uniform mat4 u_mProjection;
 
 out vec2 o_uv;
 out vec4 o_color;
+out vec3 o_normal;
 
 mat4 make_pvm()
 {
@@ -34,11 +35,63 @@ float r_avertexnormal_dot(vec3 vertexnormal) // from MH
     else
         return 1.0+dotp;
 }
+
+float new_dot(vec3 normal)
+{
+    float dotp = dot(normal, ShadeVector); 
+    
+    return dotp;
+}
+
 void main() {
     o_uv = TexCoords;
     vec4 lerpedVert = mix(vec4(Pose1Vert.xyz, 1.0), vec4(Pose2Vert.xyz, 1.0), Blend);
     gl_Position = make_pvm()*lerpedVert;
-    float dot1 = r_avertexnormal_dot(Pose1Normal);
-    float dot2 = r_avertexnormal_dot(Pose2Normal);
-    o_color = LightColor*vec4(vec3(mix(dot1, dot2, Blend)), 1.0);
+    o_normal = mix(Pose1Normal,Pose2Normal,Blend);
+
+    int dot_style = 1;
+    int lighting_style = 2;
+    float lighting_scale = 2.0;
+
+    if (dot_style == 0)
+    {
+        float dot1 = r_avertexnormal_dot(Pose1Normal);
+        float dot2 = r_avertexnormal_dot(Pose2Normal);
+        o_color = LightColor*vec4(vec3(mix(dot1, dot2, Blend)), 1.0) * lighting_scale;
+    }
+    else if (dot_style == 1)
+    {
+        float specular_threshold = 0.72;
+
+        vec3 hit_color = LightColor.xyz;
+        vec3 ambient = LightColor.xyz * 0.36;
+        vec3 specular = LightColor.xyz * 2.75;
+        float dotprod = new_dot(Pose1Normal);
+
+        vec3 outlightcolor;
+
+        
+        float amhit_mix;
+        //smoother
+        if (lighting_style == 0)
+        amhit_mix = (dotprod + 1) / 2.0;
+        else if (lighting_style == 1)
+        //traditional
+        amhit_mix = dotprod;
+        else if (lighting_style == 2)
+        //half lambertian
+        amhit_mix = pow(dotprod,2);
+        outlightcolor = mix(ambient,hit_color,clamp(amhit_mix,0,1));
+        if (dotprod >= specular_threshold)
+        {
+            outlightcolor += mix(vec3(0,0,0),specular,(dotprod - specular_threshold) * (1 / specular_threshold));
+        }
+
+        o_color = vec4(outlightcolor,1.0) * lighting_scale;
+    }
+    else
+    {
+        o_color = LightColor;
+    }
+
 };

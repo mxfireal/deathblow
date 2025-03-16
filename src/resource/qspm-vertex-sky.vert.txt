@@ -6,13 +6,14 @@ layout (location = 0) in vec3 i_origin;
 layout (location = 1) in vec2 i_uv;
 layout (location = 2) in vec2 i_uv_lm;
 
-//no model. this is (technically still) the WORLD SHADER
 uniform mat4 u_mView;
 uniform mat4 u_mProjection;
 
+out vec3 o_origin;
 out vec2 o_uv;
-out vec2 o_uv_lm;
-
+out mat4 o_view;
+out mat4 o_projection;
+out vec3 o_Rorigin;
 mat4 make_pvm()
 {
     return u_mProjection * u_mView;
@@ -24,5 +25,8 @@ void main()
     vec4 spos = (l_mPvm * vec4(i_origin,1));
 	gl_Position = spos; 
 	o_uv = i_uv;
-    o_uv_lm = i_uv_lm;
+    o_origin = i_origin;
+    o_view = u_mView;
+    o_projection = u_mProjection;
+    o_Rorigin = gl_Position.xyz;
 }
