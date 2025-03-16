@@ -18,6 +18,18 @@ extern GLint useLightmapWideLoc;
 extern GLint useLightmapOnlyLoc;
 extern GLint alphaLoc;
 
+cvar_t cv_warpstyle = {"sau_warpstyle","1",0};
+cvar_t cv_warpstyle_liquid = {"sau_warpstyle_liquid","-1",0};
+
+void rcv()
+{
+        static int sdv = 0;
+        if (sdv) return;
+        Cvar_RegisterVariable(&cv_warpstyle);
+        Cvar_RegisterVariable(&cv_warpstyle_liquid);
+        sdv=1;
+}
+
 float getscale()
 {
         extern cvar_t r_scale_uncapped;
@@ -42,6 +54,7 @@ void R_DrawEntitiesOnList(qboolean is_alphapass);
 
 void QSRSC_RenderScene()
 {
+        rcv();
         float scale = getscale();
         glViewport(glx + r_refdef.vrect.x,
                    gly + glheight - r_refdef.vrect.y - r_refdef.vrect.height,
@@ -71,6 +84,8 @@ int get_uniform(int program, char *name)
         int uni = GL_GetUniformLocationFunc(program, name);
         return uni;
 }
+
+
 
 void qsrc_DrawTextureChains(qmodel_t *model, entity_t *ent, texchain_t chain)
 {
@@ -143,6 +158,7 @@ void qsrc_DrawTextureChains(qmodel_t *model, entity_t *ent, texchain_t chain)
                 GL_VertexAttribPointerFunc(texCoordsAttrIndex, 2, GL_FLOAT, GL_FALSE, VERTEXSIZE * sizeof(float), ((float *)0) + 3);
                 GL_VertexAttribPointerFunc(LMCoordsAttrIndex, 2, GL_FLOAT, GL_FALSE, VERTEXSIZE * sizeof(float), ((float *)0) + 5);
 
+                //yeah.. i know this needs to be cached in some way
                 GL_Uniform1iFunc(get_uniform(designated_program, "Tex"), 0);
                 GL_Uniform1iFunc(get_uniform(designated_program, "LMTex"), 1);
                 GL_Uniform1iFunc(get_uniform(designated_program, "fullbrightTexLoc"), 2);
@@ -150,6 +166,15 @@ void qsrc_DrawTextureChains(qmodel_t *model, entity_t *ent, texchain_t chain)
                 GL_Uniform1iFunc(get_uniform(designated_program, "UseAlphaTest"), 0);
 
                 int fbtex_loc = get_uniform(designated_program,"UseFullbrightTex");
+
+                if (is_warp)
+                {
+                        int style = cv_warpstyle.value;
+                        int isliquid = (flags & SURF_DRAWTELE) == 0;
+                        if (isliquid && cv_warpstyle_liquid.value != -1) style = cv_warpstyle_liquid.value;
+                        GL_Uniform1iFunc(get_uniform(designated_program, "m_uWarpStyle"), style);
+                }
+
                 //GL_Uniform1iFunc(fbtex_loc, 0);
                 // do this last
                 QSPVM_Apply_FromTextureChainsGLSL(model, ent, chain);
